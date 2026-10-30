@@ -1,0 +1,30 @@
+# Dependências do Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Banco de dados e locks locais
+data/*.db
+data/*.db-wal
+data/*.db-shm
+!data/.gitkeep
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Configurações de IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs e arquivos temporários
+logs/
+*.log

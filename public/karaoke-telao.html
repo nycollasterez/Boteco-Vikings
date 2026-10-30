@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telão Oficial — Solta a Voz, Vikings!</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/logo-vikings.png">
+  <style>
+    body {
+      background-color: var(--bg-primary);
+      overflow: hidden;
+      user-select: none;
+    }
+    .telao-qr-card {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-neutral);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="telao-container">
+
+    <!-- Header do Telão Oficial -->
+    <header class="telao-header">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" style="height: 72px;">
+        <div>
+          <span style="font-size: 0.82rem; color: var(--accent-yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; display: block;">Noite do Microfone Aberto</span>
+          <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0;">Solta a Voz, Vikings!</h1>
+        </div>
+      </div>
+
+      <!-- Relógio e Status da Sessão -->
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div id="sessionStatusBadge" class="badge badge-green" style="font-size: 0.88rem; padding: 6px 14px;">
+          Sessão ao vivo
+        </div>
+        <div id="clockDisplay" style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary);">
+          --:--
+        </div>
+      </div>
+    </header>
+
+    <!-- Centro do Telão: Palco Principal -->
+    <main style="flex: 1; display: flex; align-items: center; justify-content: center;">
+      <div class="telao-stage-card" id="stageCard" style="width: 100%; max-width: 1000px;">
+        <div id="stageContent">
+          <!-- Injected via real-time poll -->
+          <div class="stage-now-badge">No palco agora</div>
+          <div class="stage-singer-name" id="stageSinger">Carregando participante...</div>
+          <div class="stage-song-title" id="stageSong">Preparando a música</div>
+          <div class="stage-artist-name" id="stageArtist">Boteco Vikings</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Rodapé do Telão: Próximos na Fila e QR Code de Inscrição -->
+    <footer class="telao-footer-row">
+      <div style="flex: 1; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span style="color: var(--text-primary); font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+            Próximos da fila:
+          </span>
+          <span id="nextQueueCount" class="badge badge-gold">0 aguardando</span>
+        </div>
+
+        <div class="telao-upcoming-list" id="upcomingList">
+          <!-- Upcoming list injected -->
+        </div>
+      </div>
+
+      <!-- QR Code para a galera da mesa entrar na fila -->
+      <div class="telao-qr-card">
+        <img id="telaoQrCodeImg" src="" alt="QR Code Inscrição" style="width: 80px; height: 80px; border-radius: var(--radius-sm); background: white; padding: 3px;">
+        <div>
+          <div style="font-size: 1rem; color: var(--text-primary); font-weight: 700; line-height: 1.2;">
+            Quer cantar?
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 3px;">
+            Aponte o celular e entre na fila
+          </div>
+          <div style="font-size: 0.74rem; color: var(--accent-yellow); margin-top: 2px;">
+            Acesso pelo cardápio digital
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clockDisplay').innerText = `${hours}:${minutes}:${seconds}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Load QR Code pointing to client karaoke signup
+    async function loadTelaoQR() {
+      try {
+        const url = `${window.location.origin}/karaoke`;
+        const res = await fetch(`/api/qrcode?text=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.dataUrl) {
+          document.getElementById('telaoQrCodeImg').src = data.dataUrl;
+        }
+      } catch (err) {
+        console.error('Erro ao gerar QR Code do telão:', err);
+      }
+    }
+
+    // Poll live stage and queue every 3.5 seconds
+    async function pollTelaoFeed() {
+      try {
+        const res = await fetch('/api/karaoke/feed');
+        const data = await res.json();
+        if (!data.success) return;
+
+        // Session status
+        const session = data.session;
+        const statusBadge = document.getElementById('sessionStatusBadge');
+        if (session && session.is_paused) {
+          statusBadge.className = 'badge badge-amber';
+          statusBadge.innerText = 'Inscrições pausadas';
+        } else {
+          statusBadge.className = 'badge badge-green';
+          statusBadge.innerText = 'Sessão ao vivo';
+        }
+
+        // Active singer on stage
+        const current = data.currentSinger;
+        const stageCard = document.getElementById('stageCard');
+        if (current) {
+          document.getElementById('stageSinger').innerText = current.client_name + (current.partner_name ? ` & ${current.partner_name}` : '');
+          document.getElementById('stageSong').innerText = current.song_title;
+          document.getElementById('stageArtist').innerText = current.song_artist;
+        } else {
+          document.getElementById('stageSinger').innerText = 'Palco Livre';
+          document.getElementById('stageSong').innerText = 'Inscreva sua música e venha cantar!';
+          document.getElementById('stageArtist').innerText = 'Boteco Vikings';
+        }
+
+        // Upcoming singers queue
+        const upcoming = data.upcomingQueue || [];
+        document.getElementById('nextQueueCount').innerText = `${upcoming.length} aguardando`;
+        const upcomingList = document.getElementById('upcomingList');
+
+        if (upcoming.length === 0) {
+          upcomingList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.88rem; padding: 10px 0;">Nenhum participante na fila. Seja o primeiro a se inscrever!</div>';
+        } else {
+          upcomingList.innerHTML = upcoming.map((item, idx) => `
+            <div class="upcoming-pill">
+              <div class="upcoming-pill-pos">${idx + 1}º da fila</div>
+              <div class="upcoming-pill-name">${item.client_name}</div>
+              <div class="upcoming-pill-song">${item.song_title} — ${item.song_artist}</div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar telão:', err);
+      }
+    }
+
+    loadTelaoQR();
+    pollTelaoFeed();
+    setInterval(pollTelaoFeed, 3500);
+  </script>
+</body>
+</html>

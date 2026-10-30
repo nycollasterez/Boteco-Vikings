@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solta a Voz, Vikings! — Karaokê Interativo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/logo-vikings.png">
+  <style>
+    .song-pick-item {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-neutral);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .song-pick-item:hover, .song-pick-item.selected {
+      border-color: var(--accent-yellow);
+      background-color: var(--bg-elevated);
+    }
+    .status-highlight-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-neutral);
+      border-left: 4px solid var(--accent-yellow);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-link">
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" class="brand-logo-img">
+      </a>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/cardapio" class="btn btn-outline btn-sm">Cardápio</a>
+        <a href="/karaoke/telao" target="_blank" class="btn btn-secondary btn-sm">Ver telão</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <div class="karaoke-hero-banner" style="background-color: var(--bg-sidebar); border-bottom: 1px solid var(--border-neutral); padding: 36px 20px;">
+    <span class="section-tag" style="display: block; margin-bottom: 6px;">Noite do Microfone Aberto</span>
+    <h1 style="font-size: 2rem; color: var(--text-primary); font-weight: 800; margin: 4px 0 8px;">Solta a Voz, Vikings!</h1>
+    <p style="max-width: 600px; margin: 0 auto; font-size: 0.95rem; color: var(--text-secondary);">
+      Escolha sua música, entre na fila oficial e acompanhe sua vez no telão do boteco.
+    </p>
+  </div>
+
+  <main style="max-width: 800px; margin: 30px auto; padding: 0 20px;">
+
+    <!-- Active Client Request Status Card (if user has active song) -->
+    <div id="myRequestContainer" style="display: none;">
+      <div class="status-highlight-box">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px;">
+          Sua Participação Ativa
+        </div>
+        <h2 id="mySongTitle" style="font-size: 1.8rem; color: var(--cream); margin-bottom: 4px;"></h2>
+        <div id="mySongArtist" style="font-size: 1.1rem; color: var(--gold-muted); margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: center; gap: 12px; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+          <span class="badge badge-amber" id="myStatusBadge">Aguardando moderação</span>
+          <span style="font-weight: 700; color: var(--gold);" id="myPositionText"></span>
+        </div>
+
+        <p id="myStatusTip" style="font-size: 0.9rem; color: var(--cream-dim); max-width: 500px; margin: 0 auto 20px;"></p>
+
+        <button class="btn btn-outline btn-sm" onclick="cancelMyKaraokeRequest()" style="color: var(--status-red); border-color: var(--status-red);">
+          Desistir da Música / Sair da Fila
+        </button>
+      </div>
+    </div>
+
+    <!-- Registration Form Card -->
+    <div class="card" id="signupCard">
+      <h3 style="font-size: 1.4rem; margin-bottom: 16px; border-bottom: 1px solid var(--border-gold); padding-bottom: 10px;">
+        1. Identifique-se
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="clientNameInput">Seu Nome ou Apelido *</label>
+          <input type="text" id="clientNameInput" class="form-control" placeholder="Ex: Rodrigo Viking" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="tableNumInput">Sua Mesa (Opcional)</label>
+          <input type="number" id="tableNumInput" class="form-control" placeholder="Ex: 4" min="1" max="50">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Modo de Apresentação</label>
+        <div style="display: flex; gap: 14px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="radio" name="singMode" value="solo" checked onchange="togglePartnerInput()">
+            <span>Solo (Voz Individual)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="radio" name="singMode" value="dupla" onchange="togglePartnerInput()">
+            <span>Dupla / Dueto 👥</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" id="partnerGroup" style="display: none;">
+        <label class="form-label" for="partnerNameInput">Nome da Dupla</label>
+        <input type="text" id="partnerNameInput" class="form-control" placeholder="Ex: Camila & Lucas">
+      </div>
+
+      <h3 style="font-size: 1.4rem; margin: 26px 0 16px; border-bottom: 1px solid var(--border-gold); padding-bottom: 10px;">
+        2. Escolha sua Música
+      </h3>
+
+      <div class="form-group">
+        <label class="form-label" for="songSearchInput">Pesquisar no Catálogo Disponível</label>
+        <input type="text" id="songSearchInput" class="form-control" placeholder="Digite nome da música, artista ou estilo...">
+      </div>
+
+      <div id="songsListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 16px;">
+        <!-- Songs loaded via API -->
+      </div>
+
+      <!-- Suggestion Option if not in catalog -->
+      <div style="background-color: var(--bg-deep); border: 1px dashed var(--border-gold); border-radius: var(--radius-md); padding: 14px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.9rem; color: var(--gold);">Não encontrou sua canção?</span>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleSuggestionBox()">Sugerir Outra Música</button>
+        </div>
+        <div id="suggestionBox" style="display: none; margin-top: 14px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+            <input type="text" id="sugTitle" class="form-control" placeholder="Título da música...">
+            <input type="text" id="sugArtist" class="form-control" placeholder="Nome do cantor/banda...">
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="useSuggestedSong()">Usar esta sugestão</button>
+        </div>
+      </div>
+
+      <div style="background-color: rgba(242, 181, 68, 0.08); border-left: 4px solid var(--gold); padding: 12px 16px; border-radius: 0 var(--radius-md) var(--radius-md) 0; margin-bottom: 24px;">
+        <strong style="color: var(--gold); font-size: 0.88rem; display: block; margin-bottom: 4px;">⚖️ Regra de Rodízio Vikings:</strong>
+        <p style="font-size: 0.82rem; color: var(--cream-dim); line-height: 1.4;">
+          Para garantir que todos se divirtam, quem ainda não cantou tem preferência na fila sobre quem já se apresentou. Ao se inscrever, você concorda com o rodízio da moderação.
+        </p>
+      </div>
+
+      <button class="btn btn-primary btn-lg" style="width: 100%;" id="btnSubmitRequest" onclick="submitKaraokeRequest()">
+        🎤 Enviar Inscrição para a Moderação
+      </button>
+    </div>
+
+    <!-- Live Session Queue Preview -->
+    <div style="margin-top: 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.3rem;">Fila de Espera Oficial</h3>
+        <span class="badge badge-gold" id="queueTotalBadge">0 na fila</span>
+      </div>
+
+      <div id="publicQueueList" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let songs = [];
+    let selectedSong = null;
+    let myActiveRequestId = localStorage.getItem('vikings_karaoke_req_id') || null;
+    let karaokePollInterval = null;
+
+    async function initKaraoke() {
+      await loadSongs();
+      await loadPublicQueue();
+      if (myActiveRequestId) {
+        checkMyRequestStatus();
+      }
+      karaokePollInterval = setInterval(() => {
+        loadPublicQueue();
+        if (myActiveRequestId) checkMyRequestStatus();
+      }, 5000);
+    }
+
+    async function loadSongs(query = '') {
+      try {
+        const res = await fetch(`/api/karaoke/songs?search=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        songs = data.songs || [];
+        renderSongsList();
+      } catch (err) {
+        console.error('Erro ao carregar catálogo:', err);
+      }
+    }
+
+    function renderSongsList() {
+      const container = document.getElementById('songsListContainer');
+      if (songs.length === 0) {
+        container.innerHTML = '<div style="color: var(--cream-dim); padding: 10px; text-align: center;">Nenhuma música encontrada no catálogo oficial. Use a opção de sugestão abaixo!</div>';
+        return;
+      }
+
+      container.innerHTML = songs.map(s => `
+        <div class="song-pick-item ${selectedSong && selectedSong.id === s.id ? 'selected' : ''}" onclick="pickSong(${s.id})">
+          <div>
+            <div style="font-weight: 700; color: var(--gold);">${s.title}</div>
+            <div style="font-size: 0.85rem; color: var(--cream);">${s.artist} • <span style="color: var(--gold-muted);">${s.genre || ''}</span></div>
+          </div>
+          <span class="badge badge-gold" style="font-size: 0.72rem;">${s.difficulty || 'Média'}</span>
+        </div>
+      `).join('');
+    }
+
+    function pickSong(id) {
+      selectedSong = songs.find(s => s.id === id);
+      renderSongsList();
+      document.getElementById('suggestionBox').style.display = 'none';
+    }
+
+    document.getElementById('songSearchInput').addEventListener('input', (e) => {
+      loadSongs(e.target.value.trim());
+    });
+
+    function togglePartnerInput() {
+      const isDupla = document.querySelector('input[name="singMode"]:checked').value === 'dupla';
+      document.getElementById('partnerGroup').style.display = isDupla ? 'block' : 'none';
+    }
+
+    function toggleSuggestionBox() {
+      const box = document.getElementById('suggestionBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function useSuggestedSong() {
+      const title = document.getElementById('sugTitle').value.trim();
+      const artist = document.getElementById('sugArtist').value.trim();
+      if (!title || !artist) {
+        alert('Informe o título da música e o nome do artista para sugerir.');
+        return;
+      }
+      selectedSong = {
+        id: 'sug_' + Date.now(),
+        title,
+        artist,
+        is_suggestion: true
+      };
+      alert(`Música sugerida "${title}" selecionada! Complete seu nome e clique em Enviar.`);
+      renderSongsList();
+    }
+
+    async function submitKaraokeRequest() {
+      const name = document.getElementById('clientNameInput').value.trim();
+      const table = document.getElementById('tableNumInput').value.trim();
+      const mode = document.querySelector('input[name="singMode"]:checked').value;
+      const partner = document.getElementById('partnerNameInput').value.trim();
+
+      if (!name) {
+        alert('Por favor, informe seu nome ou apelido.');
+        return;
+      }
+
+      if (!selectedSong) {
+        alert('Selecione uma música do catálogo ou faça uma sugestão.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitRequest');
+      btn.disabled = true;
+      btn.innerText = 'Enviando inscrição...';
+
+      try {
+        const payload = {
+          client_name: name,
+          table_number: table ? parseInt(table, 10) : null,
+          song_title: selectedSong.title,
+          song_artist: selectedSong.artist,
+          mode,
+          partner_name: mode === 'dupla' ? partner : null,
+          is_suggestion: !!selectedSong.is_suggestion
+        };
+
+        const res = await fetch('/api/karaoke/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          myActiveRequestId = data.requestId;
+          localStorage.setItem('vikings_karaoke_req_id', myActiveRequestId);
+          alert(data.message);
+          checkMyRequestStatus();
+          loadPublicQueue();
+        } else {
+          alert('Atenção: ' + data.message);
+        }
+      } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao enviar solicitação. Verifique sua conexão.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '🎤 Enviar Inscrição para a Moderação';
+      }
+    }
+
+    async function checkMyRequestStatus() {
+      if (!myActiveRequestId) return;
+      try {
+        const res = await fetch(`/api/karaoke/my-status/${myActiveRequestId}`);
+        if (!res.ok) {
+          myActiveRequestId = null;
+          localStorage.removeItem('vikings_karaoke_req_id');
+          document.getElementById('myRequestContainer').style.display = 'none';
+          document.getElementById('signupCard').style.display = 'block';
+          return;
+        }
+
+        const data = await res.json();
+        const reqItem = data.request;
+
+        if (['concluido', 'desistiu', 'recusado'].includes(reqItem.status)) {
+          if (reqItem.status === 'concluido') {
+            alert('Parabéns pela apresentação no palco do Vikings! Soltou a voz com honra!');
+          } else if (reqItem.status === 'recusado') {
+            alert('Sua solicitação de música não pôde ser aprovada: ' + (reqItem.reject_reason || 'Motivo não informado'));
+          }
+          myActiveRequestId = null;
+          localStorage.removeItem('vikings_karaoke_req_id');
+          document.getElementById('myRequestContainer').style.display = 'none';
+          document.getElementById('signupCard').style.display = 'block';
+          return;
+        }
+
+        // Display active card
+        document.getElementById('myRequestContainer').style.display = 'block';
+        document.getElementById('signupCard').style.display = 'none';
+
+        document.getElementById('mySongTitle').innerText = reqItem.song_title;
+        document.getElementById('mySongArtist').innerText = reqItem.song_artist + (reqItem.partner_name ? ` (com ${reqItem.partner_name})` : '');
+
+        const badge = document.getElementById('myStatusBadge');
+        const posText = document.getElementById('myPositionText');
+        const tip = document.getElementById('myStatusTip');
+
+        if (reqItem.status === 'pendente') {
+          badge.className = 'badge badge-amber';
+          badge.innerText = 'Aguardando Moderação';
+          posText.innerText = '';
+          tip.innerText = 'O responsável pelo karaokê está revisando sua inscrição.';
+        } else if (reqItem.status === 'aprovado') {
+          badge.className = 'badge badge-green';
+          badge.innerText = 'Na Fila Oficial';
+          posText.innerText = data.position ? `Posição na fila: ${data.position}º` : '';
+          tip.innerText = data.position === 1 
+            ? '🔥 Prepare a voz! Você é o PRÓXIMO a cantar no telão!' 
+            : 'Fique de olho no telão do boteco. Seu nome aparecerá em breve.';
+        } else if (reqItem.status === 'no_palco') {
+          badge.className = 'badge badge-gold';
+          badge.innerText = 'NO PALCO AGORA!';
+          posText.innerText = 'É A SUA VEZ!';
+          tip.innerText = '🎤 Dirija-se ao palco e pegue seu microfone! O Boteco Vikings quer te ouvir!';
+        }
+      } catch (err) {
+        console.error('Erro ao verificar status do cliente:', err);
+      }
+    }
+
+    async function cancelMyKaraokeRequest() {
+      if (!confirm('Deseja realmente desistir e sair da fila do karaokê?')) return;
+      try {
+        const res = await fetch(`/api/karaoke/cancel-my-request/${myActiveRequestId}`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message);
+        myActiveRequestId = null;
+        localStorage.removeItem('vikings_karaoke_req_id');
+        document.getElementById('myRequestContainer').style.display = 'none';
+        document.getElementById('signupCard').style.display = 'block';
+        loadPublicQueue();
+      } catch (err) {
+        alert('Erro ao cancelar solicitação.');
+      }
+    }
+
+    async function loadPublicQueue() {
+      try {
+        const res = await fetch('/api/karaoke/queue');
+        const data = await res.json();
+        const container = document.getElementById('publicQueueList');
+        const countBadge = document.getElementById('queueTotalBadge');
+
+        countBadge.innerText = `${data.queue ? data.queue.length : 0} na fila`;
+
+        let html = '';
+        if (data.current) {
+          html += `
+            <div style="background: linear-gradient(135deg, #381d0c 0%, #1e0d04 100%); border: 2px solid var(--gold); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <span class="badge badge-gold" style="margin-bottom: 4px;">NO PALCO AGORA</span>
+                <div style="font-size: 1.15rem; font-weight: 800; color: var(--cream);">${data.current.client_name} ${data.current.partner_name ? '& ' + data.current.partner_name : ''}</div>
+                <div style="font-size: 0.9rem; color: var(--gold);">${data.current.song_title} — ${data.current.song_artist}</div>
+              </div>
+              <span style="font-size: 2rem;">🎤</span>
+            </div>
+          `;
+        }
+
+        if (data.queue && data.queue.length > 0) {
+          html += data.queue.map((q, idx) => `
+            <div style="background-color: var(--bg-surface); border: 1px solid var(--border-gold); border-radius: var(--radius-md); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="font-family: var(--font-title); font-size: 1.2rem; font-weight: 800; color: var(--gold); min-width: 24px;">#${idx + 1}</span>
+                <div>
+                  <div style="font-weight: 700; color: var(--cream);">${q.client_name} ${q.partner_name ? '& ' + q.partner_name : ''}</div>
+                  <div style="font-size: 0.85rem; color: var(--gold-muted);">${q.song_title} — ${q.song_artist}</div>
+                </div>
+              </div>
+              ${idx === 0 ? '<span class="badge badge-amber">A Seguir</span>' : ''}
+            </div>
+          `).join('');
+        } else if (!data.current) {
+          html = '<div style="text-align: center; color: var(--cream-dim); padding: 20px;">A fila está aberta! Seja o primeiro guerreiro a subir no palco.</div>';
+        }
+
+        container.innerHTML = html;
+      } catch (err) {
+        console.error('Erro na fila:', err);
+      }
+    }
+
+    initKaraoke();
+  </script>
+</body>
+</html>

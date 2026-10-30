@@ -1,0 +1,28 @@
+{
+  "name": "boteco-vikings",
+  "version": "1.0.0",
+  "description": "Plataforma integrada para o Boteco Vikings: Landing Page, Cardápio Digital QR Code, Painel de Gestão & PDV, KDS Cozinha/Bar e Karaokê Interativo com Telão.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node test/suite.js"
+  },
+  "keywords": [
+    "boteco",
+    "vikings",
+    "pdv",
+    "kds",
+    "cardapio-digital",
+    "karaoke",
+    "restaurante",
+    "bar"
+  ],
+  "author": "Boteco Vikings",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.3.0",
+    "qrcode": "^1.5.4"
+  }
+}

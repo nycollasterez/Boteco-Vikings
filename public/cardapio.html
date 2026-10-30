@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Digital — Boteco Vikings</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/logo-vikings.png">
+  <style>
+    .cart-badge {
+      background-color: #101010;
+      color: var(--accent-yellow);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .product-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .product-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-neutral);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      border-color: #444;
+      transform: translateY(-2px);
+    }
+    .product-thumb {
+      height: 180px;
+      width: 100%;
+      object-fit: cover;
+      background-color: #151515;
+    }
+    .product-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .product-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .product-desc {
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-neutral);
+      padding-top: 12px;
+      margin-top: auto;
+    }
+    .product-price {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .addon-checkbox-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-neutral);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .addon-checkbox-label:hover {
+      border-color: var(--accent-yellow);
+    }
+  </style>
+</head>
+<body style="padding-bottom: 100px;">
+
+  <!-- Sticky Top Header -->
+  <header class="menu-page-header">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <a href="/" style="display: flex; align-items: center; gap: 12px;" title="Voltar à Página Inicial">
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" style="height: 54px; transition: transform 0.2s;">
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="tableBadgeContainer" style="display: none;">
+          <span class="table-indicator-pill" id="tableBadge" style="padding: 6px 14px; font-size: 0.9rem;">
+            Mesa <strong id="tableNumberDisplay"></strong>
+          </span>
+        </div>
+
+        <a href="/" class="btn btn-secondary btn-sm">Início</a>
+        <a href="/karaoke" class="btn btn-outline btn-sm">Karaokê</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Box -->
+  <div class="menu-search-box">
+    <input type="text" id="searchInput" class="menu-search-input" placeholder="Buscar chopp, drink, porção, burger...">
+  </div>
+
+  <!-- Category Pills Bar -->
+  <div class="category-pills-bar" id="categoryPills">
+    <button class="pill-item active" data-cat="all">Todos os Itens</button>
+    <!-- Categories injected dynamically -->
+  </div>
+
+  <!-- Active Order Tracker Bar (if active order exists) -->
+  <div id="activeOrderAlert" style="display: none; max-width: 1200px; margin: 16px auto 0; padding: 0 20px;">
+    <div class="card" style="border: 1px solid var(--border-neutral); border-left: 4px solid var(--accent-yellow); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge badge-amber" id="activeOrderStatusBadge">Aguardando confirmação</span>
+          <strong style="color: var(--text-primary);" id="activeOrderTitle">Pedido #...</strong>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="activeOrderSubtitle">
+          Sua solicitação está sendo conferida pela equipe.
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btnOpenTracker">Ver acompanhamento</button>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <main>
+    <div class="product-list-grid" id="productsGrid">
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+        Carregando itens do cardápio...
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Cart Bar -->
+  <div class="cart-floating-bar" id="cartBar" style="display: none;" onclick="openCartModal()">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="cart-badge" id="cartItemCount">0</span>
+      <span>Ver comanda</span>
+    </div>
+    <div style="font-size: 1.1rem; font-weight: 700;" id="cartTotalDisplay">
+      R$ 0,00
+    </div>
+  </div>
+
+  <!-- Product Options Modal -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <h3 id="modalProdName" style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);"></h3>
+        <button onclick="closeProductModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <p id="modalProdDesc" style="font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;"></p>
+
+      <!-- Variations (Single Select) -->
+      <div id="modalVariationsBox" style="margin-bottom: 20px; display: none;">
+        <label class="form-label">Tamanho / Opção</label>
+        <div id="variationsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      </div>
+
+      <!-- Addons (Multi Select) -->
+      <div id="modalAddonsBox" style="margin-bottom: 20px; display: none;">
+        <label class="form-label">Adicionais e Acompanhamentos</label>
+        <div id="addonsList"></div>
+      </div>
+
+      <!-- Notes Field -->
+      <div class="form-group">
+        <label class="form-label" for="itemNotes">Observações para o Bar/Cozinha</label>
+        <textarea id="itemNotes" class="form-control" placeholder="Ex: Ponto da carne mal passado, chopp bem gelado, sem gelo..."></textarea>
+      </div>
+
+      <!-- Quantity and Add Button -->
+      <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-gold); padding-top: 20px; margin-top: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="btn btn-secondary btn-sm" onclick="changeQty(-1)" style="width: 36px; height: 36px; padding: 0;">-</button>
+          <span id="modalQtyDisplay" style="font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; min-width: 24px; text-align: center;">1</span>
+          <button class="btn btn-secondary btn-sm" onclick="changeQty(1)" style="width: 36px; height: 36px; padding: 0;">+</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="confirmAddToCart()" id="btnAddProductCart">
+          Adicionar • <span id="modalItemTotalPrice">R$ 0,00</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart / Checkout Review Modal -->
+  <div class="modal-backdrop" id="cartModal">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-gold); padding-bottom: 12px;">
+        <h3 style="font-size: 1.4rem;">Revisão do Pedido</h3>
+        <button onclick="closeCartModal()" style="background: none; border: none; color: var(--cream); font-size: 1.6rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div id="cartItemsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; max-height: 280px; overflow-y: auto;">
+        <!-- Cart Items -->
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="checkoutTableInput">Número da Mesa</label>
+        <input type="number" id="checkoutTableInput" class="form-control" placeholder="Ex: 5" min="1" max="50">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="checkoutClientName">Nome / Apelido</label>
+        <input type="text" id="checkoutClientName" class="form-control" placeholder="Ex: Bruno Vikings">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="checkoutNotes">Observação Geral do Pedido</label>
+        <input type="text" id="checkoutNotes" class="form-control" placeholder="Ex: Trazer todos os copos juntos">
+      </div>
+
+      <div style="background-color: var(--bg-deep); border: 1px solid var(--border-gold); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 700; color: var(--gold);">
+          <span>Total do Pedido:</span>
+          <span id="cartModalTotal">R$ 0,00</span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--cream-dim); margin-top: 6px;">
+          🔒 O pedido passará pela aprovação do garçom antes de ser liberado para o preparo.
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%;" onclick="submitOrder()" id="btnSubmitOrder">
+        Confirmar e Enviar Pedido 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Order Tracker Modal -->
+  <div class="modal-backdrop" id="trackerModal">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.3rem;">Status do Pedido <span id="trackOrderNum" style="color: var(--gold);"></span></h3>
+        <button onclick="closeTrackerModal()" style="background: none; border: none; color: var(--cream); font-size: 1.6rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <!-- Timeline steps -->
+      <div class="order-tracker-timeline">
+        <div class="timeline-step" id="step-aguardando">
+          <div class="step-circle">1</div>
+          <div class="step-title">Aguardando Confirmação</div>
+        </div>
+        <div class="timeline-step" id="step-confirmado">
+          <div class="step-circle">2</div>
+          <div class="step-title">Confirmado</div>
+        </div>
+        <div class="timeline-step" id="step-preparo">
+          <div class="step-circle">3</div>
+          <div class="step-title">Em Preparo</div>
+        </div>
+        <div class="timeline-step" id="step-pronto">
+          <div class="step-circle">4</div>
+          <div class="step-title">Pronto</div>
+        </div>
+        <div class="timeline-step" id="step-entregue">
+          <div class="step-circle">5</div>
+          <div class="step-title">Entregue</div>
+        </div>
+      </div>
+
+      <div id="trackerStatusBox" style="text-align: center; background-color: var(--bg-deep); border: 1px solid var(--border-gold); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+        <div style="font-family: var(--font-title); font-size: 1.25rem; color: var(--gold);" id="trackStatusText">Aguardando conferência...</div>
+        <p style="font-size: 0.88rem; margin-top: 6px; color: var(--cream-dim);" id="trackStatusDesc">A equipe está confirmando sua mesa.</p>
+      </div>
+
+      <div style="font-size: 0.9rem; font-weight: 700; color: var(--gold-muted); margin-bottom: 10px;">Itens Solicitados:</div>
+      <div id="trackItemsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;"></div>
+
+      <button class="btn btn-secondary" style="width: 100%;" onclick="closeTrackerModal()">Voltar ao Cardápio</button>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let categories = [];
+    let products = [];
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let cart = [];
+    let currentModalProduct = null;
+    let selectedVariation = null;
+    let selectedAddons = [];
+    let itemQuantity = 1;
+
+    // Check URL parameters for Table Number (e.g. /cardapio?mesa=3)
+    const urlParams = new URLSearchParams(window.location.search);
+    const mesaParam = urlParams.get('mesa') || urlParams.get('table');
+
+    if (mesaParam) {
+      document.getElementById('tableBadgeContainer').style.display = 'block';
+      document.getElementById('tableNumberDisplay').innerText = mesaParam;
+      document.getElementById('checkoutTableInput').value = mesaParam;
+    }
+
+    // Active order tracking
+    let activeOrderId = localStorage.getItem('vikings_last_order_id') || null;
+    let trackerPollInterval = null;
+
+    async function initMenu() {
+      await loadCategories();
+      await loadProducts();
+      if (activeOrderId) {
+        checkActiveOrderStatus();
+        startTrackerPolling();
+      }
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await fetch('/api/menu/categories');
+        const data = await res.json();
+        categories = data.categories || [];
+        renderCategoryPills();
+      } catch (err) {
+        console.error('Erro ao carregar categorias:', err);
+      }
+    }
+
+    function renderCategoryPills() {
+      const container = document.getElementById('categoryPills');
+      container.innerHTML = `
+        <button class="pill-item ${activeCategory === 'all' ? 'active' : ''}" onclick="selectCategory('all')">Todos os Itens</button>
+        ${categories.map(c => `
+          <button class="pill-item ${activeCategory == c.id ? 'active' : ''}" onclick="selectCategory(${c.id})">${c.name}</button>
+        `).join('')}
+      `;
+    }
+
+    function selectCategory(catId) {
+      activeCategory = catId;
+      renderCategoryPills();
+      renderProducts();
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/menu/products');
+        const data = await res.json();
+        products = data.products || [];
+        renderProducts();
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
+      }
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('productsGrid');
+      const filtered = products.filter(p => {
+        const matchCategory = activeCategory === 'all' || p.category_id == activeCategory;
+        const matchSearch = searchQuery === '' || 
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchCategory && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--cream-dim);">Nenhum produto encontrado nesta categoria.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(prod => `
+        <div class="product-card" onclick="openProductModal(${prod.id})">
+          <div style="position: relative;">
+            <img src="${prod.image_url || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}" alt="${prod.name}" class="product-thumb">
+            <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;">
+              ${prod.is_sold_out ? '<span class="badge badge-red">Esgotado</span>' : ''}
+              ${prod.is_featured ? '<span class="badge badge-gold">Destaque</span>' : ''}
+            </div>
+          </div>
+          <div class="product-body">
+            <div>
+              <h4 class="product-name">${prod.name}</h4>
+              <p class="product-desc">${prod.description || ''}</p>
+            </div>
+            <div class="product-footer">
+              <span class="product-price">R$ ${prod.price.toFixed(2)}</span>
+              <button class="btn btn-primary btn-sm" ${prod.is_sold_out ? 'disabled style="opacity:0.5"' : ''}>
+                ${prod.is_sold_out ? 'Esgotado' : 'Pedir +'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderProducts();
+    });
+
+    // Product Modal Details
+    function openProductModal(prodId) {
+      const prod = products.find(p => p.id === prodId);
+      if (!prod || prod.is_sold_out) return;
+
+      currentModalProduct = prod;
+      selectedVariation = (prod.variations && prod.variations.length > 0) ? prod.variations[0] : null;
+      selectedAddons = [];
+      itemQuantity = 1;
+
+      document.getElementById('modalProdName').innerText = prod.name;
+      document.getElementById('modalProdDesc').innerText = prod.description || '';
+      document.getElementById('itemNotes').value = '';
+      document.getElementById('modalQtyDisplay').innerText = '1';
+
+      // Variations
+      const varBox = document.getElementById('modalVariationsBox');
+      const varList = document.getElementById('variationsList');
+      if (prod.variations && prod.variations.length > 0) {
+        varBox.style.display = 'block';
+        varList.innerHTML = prod.variations.map((v, i) => `
+          <label class="addon-checkbox-label">
+            <div>
+              <input type="radio" name="prodVariation" value="${i}" ${i === 0 ? 'checked' : ''} onchange="selectVariation(${i})">
+              <span style="margin-left: 8px; font-weight: 600;">${v.name}</span>
+            </div>
+            <span style="color: var(--gold); font-weight: 700;">R$ ${v.price.toFixed(2)}</span>
+          </label>
+        `).join('');
+      } else {
+        varBox.style.display = 'none';
+      }
+
+      // Addons
+      const addBox = document.getElementById('modalAddonsBox');
+      const addList = document.getElementById('addonsList');
+      if (prod.addons && prod.addons.length > 0) {
+        addBox.style.display = 'block';
+        addList.innerHTML = prod.addons.map((a, i) => `
+          <label class="addon-checkbox-label">
+            <div>
+              <input type="checkbox" value="${a.name}" onchange="toggleAddon('${a.name}', ${a.price}, this.checked)">
+              <span style="margin-left: 8px;">${a.name}</span>
+            </div>
+            <span style="color: var(--gold);">+ R$ ${a.price.toFixed(2)}</span>
+          </label>
+        `).join('');
+      } else {
+        addBox.style.display = 'none';
+      }
+
+      updateModalTotal();
+      document.getElementById('productModal').classList.add('open');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.remove('open');
+      currentModalProduct = null;
+    }
+
+    function selectVariation(index) {
+      selectedVariation = currentModalProduct.variations[index];
+      updateModalTotal();
+    }
+
+    function toggleAddon(name, price, checked) {
+      if (checked) {
+        selectedAddons.push({ name, price });
+      } else {
+        selectedAddons = selectedAddons.filter(a => a.name !== name);
+      }
+      updateModalTotal();
+    }
+
+    function changeQty(delta) {
+      itemQuantity = Math.max(1, itemQuantity + delta);
+      document.getElementById('modalQtyDisplay').innerText = itemQuantity;
+      updateModalTotal();
+    }
+
+    function updateModalTotal() {
+      if (!currentModalProduct) return;
+      const basePrice = selectedVariation ? selectedVariation.price : currentModalProduct.price;
+      const addonsSum = selectedAddons.reduce((acc, a) => acc + a.price, 0);
+      const total = (basePrice + addonsSum) * itemQuantity;
+      document.getElementById('modalItemTotalPrice').innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    function confirmAddToCart() {
+      if (!currentModalProduct) return;
+
+      const basePrice = selectedVariation ? selectedVariation.price : currentModalProduct.price;
+      const addonsSum = selectedAddons.reduce((acc, a) => acc + a.price, 0);
+      const unitTotal = basePrice + addonsSum;
+
+      cart.push({
+        product_id: currentModalProduct.id,
+        name: currentModalProduct.name,
+        quantity: itemQuantity,
+        unit_price: unitTotal,
+        variation_name: selectedVariation ? selectedVariation.name : '',
+        addons: selectedAddons.map(a => a.name),
+        notes: document.getElementById('itemNotes').value.trim()
+      });
+
+      closeProductModal();
+      updateCartFloatingBar();
+    }
+
+    function updateCartFloatingBar() {
+      const bar = document.getElementById('cartBar');
+      const totalCount = cart.reduce((acc, it) => acc + it.quantity, 0);
+      const totalPrice = cart.reduce((acc, it) => acc + (it.unit_price * it.quantity), 0);
+
+      if (totalCount > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('cartItemCount').innerText = totalCount;
+        document.getElementById('cartTotalDisplay').innerText = `R$ ${totalPrice.toFixed(2)}`;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    // Cart Modal View
+    function openCartModal() {
+      const container = document.getElementById('cartItemsContainer');
+      if (cart.length === 0) {
+        container.innerHTML = '<div style="color: var(--cream-dim); text-align: center;">Nenhum item selecionado ainda.</div>';
+      } else {
+        container.innerHTML = cart.map((it, idx) => `
+          <div style="background-color: #221004; border: 1px solid var(--border-gold); border-radius: var(--radius-md); padding: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-weight: 700; color: var(--gold);">${it.quantity}x ${it.name}</div>
+              ${it.variation_name ? `<div style="font-size: 0.8rem; color: var(--cream);">${it.variation_name}</div>` : ''}
+              ${it.addons.length > 0 ? `<div style="font-size: 0.8rem; color: var(--gold-muted);">${it.addons.join(', ')}</div>` : ''}
+              ${it.notes ? `<div style="font-size: 0.8rem; color: var(--cream-dim); font-style: italic;">Obs: ${it.notes}</div>` : ''}
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 700; color: var(--cream);">R$ ${(it.unit_price * it.quantity).toFixed(2)}</div>
+              <button onclick="removeFromCart(${idx})" style="background: none; border: none; color: var(--status-red); font-size: 0.8rem; cursor: pointer; margin-top: 6px;">Remover</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const grandTotal = cart.reduce((acc, it) => acc + (it.unit_price * it.quantity), 0);
+      document.getElementById('cartModalTotal').innerText = `R$ ${grandTotal.toFixed(2)}`;
+      document.getElementById('cartModal').classList.add('open');
+    }
+
+    function closeCartModal() {
+      document.getElementById('cartModal').classList.remove('open');
+    }
+
+    function removeFromCart(idx) {
+      cart.splice(idx, 1);
+      updateCartFloatingBar();
+      openCartModal();
+    }
+
+    async function submitOrder() {
+      if (cart.length === 0) return;
+
+      const tableInput = document.getElementById('checkoutTableInput').value.trim();
+      const clientName = document.getElementById('checkoutClientName').value.trim() || 'Cliente';
+      const orderNotes = document.getElementById('checkoutNotes').value.trim();
+
+      const btn = document.getElementById('btnSubmitOrder');
+      btn.disabled = true;
+      btn.innerText = 'Enviando...';
+
+      try {
+        const payload = {
+          table_number: tableInput ? parseInt(tableInput, 10) : null,
+          client_name: clientName,
+          origin: tableInput ? 'qr_mesa' : 'balcao',
+          notes: orderNotes,
+          items: cart
+        };
+
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          cart = [];
+          updateCartFloatingBar();
+          closeCartModal();
+
+          activeOrderId = data.orderId;
+          localStorage.setItem('vikings_last_order_id', activeOrderId);
+
+          startTrackerPolling();
+          openTrackerModal();
+        } else {
+          alert('Erro ao enviar pedido: ' + data.message);
+        }
+      } catch (err) {
+        console.error('Falha de conexão:', err);
+        alert('Erro de conexão ao enviar o pedido. Por favor, tente novamente.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Confirmar e Enviar Pedido 🚀';
+      }
+    }
+
+    // Live Tracker Controls
+    async function checkActiveOrderStatus() {
+      if (!activeOrderId) return;
+      try {
+        const res = await fetch(`/api/orders/track/${activeOrderId}`);
+        if (!res.ok) {
+          activeOrderId = null;
+          localStorage.removeItem('vikings_last_order_id');
+          document.getElementById('activeOrderAlert').style.display = 'none';
+          return;
+        }
+
+        const data = await res.json();
+        const order = data.order;
+        if (!order) return;
+
+        // Show banner
+        const banner = document.getElementById('activeOrderAlert');
+        banner.style.display = 'block';
+        document.getElementById('activeOrderTitle').innerText = `Pedido #${order.id} (${order.table_number ? 'Mesa ' + order.table_number : 'Balcão'})`;
+
+        const badge = document.getElementById('activeOrderStatusBadge');
+        const subtitle = document.getElementById('activeOrderSubtitle');
+
+        const stepAguardando = document.getElementById('step-aguardando');
+        const stepConfirmado = document.getElementById('step-confirmado');
+        const stepPreparo = document.getElementById('step-preparo');
+        const stepPronto = document.getElementById('step-pronto');
+        const stepEntregue = document.getElementById('step-entregue');
+
+        [stepAguardando, stepConfirmado, stepPreparo, stepPronto, stepEntregue].forEach(s => {
+          s.classList.remove('active', 'completed');
+        });
+
+        const statusMap = {
+          'aguardando_confirmacao': {
+            badge: 'badge-amber',
+            text: 'Aguardando confirmação',
+            desc: 'Aguardando garçom conferir sua mesa para liberar o preparo.',
+            step: 1
+          },
+          'confirmado': {
+            badge: 'badge-blue',
+            text: 'Confirmado pela equipe',
+            desc: 'Pedido aceito! Enviado para o bar e cozinha.',
+            step: 2
+          },
+          'em_preparo': {
+            badge: 'badge-amber',
+            text: 'Em preparo',
+            desc: 'Guerreiros da cozinha e barman estão preparando seu pedido com capricho!',
+            step: 3
+          },
+          'pronto': {
+            badge: 'badge-green',
+            text: 'Pronto para entrega',
+            desc: 'Seu pedido já está pronto e a caminho da sua mesa!',
+            step: 4
+          },
+          'entregue': {
+            badge: 'badge-green',
+            text: 'Entregue à mesa',
+            desc: 'Banquete entregue! Aproveite a noite no Boteco Vikings.',
+            step: 5
+          }
+        };
+
+        const currentConf = statusMap[order.status] || { badge: 'badge-gold', text: order.status, desc: '', step: 1 };
+        badge.className = `badge ${currentConf.badge}`;
+        badge.innerText = currentConf.text;
+        subtitle.innerText = currentConf.desc;
+
+        document.getElementById('trackOrderNum').innerText = `#${order.id}`;
+        document.getElementById('trackStatusText').innerText = currentConf.text;
+        document.getElementById('trackStatusDesc').innerText = currentConf.desc;
+
+        if (currentConf.step >= 1) stepAguardando.classList.add(currentConf.step === 1 ? 'active' : 'completed');
+        if (currentConf.step >= 2) stepConfirmado.classList.add(currentConf.step === 2 ? 'active' : 'completed');
+        if (currentConf.step >= 3) stepPreparo.classList.add(currentConf.step === 3 ? 'active' : 'completed');
+        if (currentConf.step >= 4) stepPronto.classList.add(currentConf.step === 4 ? 'active' : 'completed');
+        if (currentConf.step >= 5) stepEntregue.classList.add('completed');
+
+        // Items in tracker modal
+        const listContainer = document.getElementById('trackItemsList');
+        listContainer.innerHTML = (order.items || []).map(it => `
+          <div style="background-color: #221004; border: 1px solid var(--border-gold); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span>${it.quantity}x ${it.product_name}</span>
+            <span class="badge ${it.prep_status === 'entregue' ? 'badge-green' : it.prep_status === 'pronto' ? 'badge-green' : it.prep_status === 'em_preparo' ? 'badge-amber' : 'badge-gold'}">
+              ${it.prep_status}
+            </span>
+          </div>
+        `).join('');
+
+        if (order.status === 'entregue') {
+          // Keep showing for a while, then user can dismiss
+        }
+      } catch (err) {
+        console.error('Erro ao verificar status:', err);
+      }
+    }
+
+    function startTrackerPolling() {
+      if (trackerPollInterval) clearInterval(trackerPollInterval);
+      trackerPollInterval = setInterval(checkActiveOrderStatus, 4000);
+    }
+
+    function openTrackerModal() {
+      checkActiveOrderStatus();
+      document.getElementById('trackerModal').classList.add('open');
+    }
+
+    function closeTrackerModal() {
+      document.getElementById('trackerModal').classList.remove('open');
+    }
+
+    document.getElementById('btnOpenTracker').addEventListener('click', openTrackerModal);
+
+    initMenu();
+  </script>
+</body>
+</html>

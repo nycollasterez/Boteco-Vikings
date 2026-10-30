@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Gestão e PDV — Boteco Vikings</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/logo-vikings.png">
+  <style>
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+    .demo-selector-bar {
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-neutral);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.84rem;
+      flex-wrap: wrap;
+    }
+    .demo-role-select {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-neutral);
+      color: var(--text-primary);
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .demo-role-select:focus {
+      border-color: var(--accent-yellow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo Role Quick Switcher Bar -->
+  <div class="demo-selector-bar no-print">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="color: var(--text-secondary); font-weight: 600;">Demonstração:</span>
+      <select id="demoRoleSelector" class="demo-role-select" onchange="switchDemoUser(this.value)">
+        <option value="admin">Administrador (Ragnar)</option>
+        <option value="gerente">Gerente (Lagertha)</option>
+        <option value="caixa">Operador de Caixa (Bjorn)</option>
+        <option value="garcom">Garçom do Salão (Floki)</option>
+        <option value="cozinha">Chef de Cozinha (Ivar)</option>
+        <option value="bar">Barman (Rollo)</option>
+        <option value="karaoke">Operador de Karaokê (Harald)</option>
+      </select>
+    </div>
+    <div>
+      <span style="font-size: 0.78rem; color: var(--text-secondary);">Simulação de permissões e controle de acesso</span>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+
+    <!-- Sidebar Navigation (250px, Fundo #121212) -->
+    <aside class="admin-sidebar no-print">
+      <div class="admin-sidebar-header">
+        <a href="/" target="_blank" title="Abrir página inicial">
+          <img src="/assets/logo-vikings.png" alt="Boteco Vikings" class="admin-sidebar-logo">
+        </a>
+        <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.05em;">SISTEMA INTEGRADO</div>
+        <div class="admin-user-pill" id="sidebarUserPill">
+          <span id="currentUserName">Ragnar Admin</span> (<span id="currentUserRole">admin</span>)
+        </div>
+      </div>
+
+      <ul class="admin-nav-list" id="adminNavList">
+        <li class="admin-nav-link active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard')">
+          <span>Dashboard geral</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-mesas" onclick="switchTab('tab-mesas')">
+          <span>Salão e mesas</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-pendentes" onclick="switchTab('tab-pendentes')">
+          <span>Pedidos pendentes</span> <span class="badge badge-amber" id="pendingOrdersCountBadge" style="margin-left: auto; display: none;">0</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-pdv" onclick="switchTab('tab-pdv')">
+          <span>PDV e caixa</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-cozinha" onclick="switchTab('tab-cozinha')">
+          <span>KDS cozinha</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-bar" onclick="switchTab('tab-bar')">
+          <span>KDS bar</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-prontos" onclick="switchTab('tab-prontos')">
+          <span>Prontos para servir</span> <span class="badge badge-green" id="readyOrdersCountBadge" style="margin-left: auto; display: none;">0</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-karaoke" onclick="switchTab('tab-karaoke')">
+          <span>Moderação de karaokê</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-cardapio" onclick="switchTab('tab-cardapio')">
+          <span>Gestão do cardápio</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-agenda" onclick="switchTab('tab-agenda')">
+          <span>Agenda de eventos</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-estoque" onclick="switchTab('tab-estoque')">
+          <span>Controle de estoque</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-relatorios" onclick="switchTab('tab-relatorios')">
+          <span>Relatórios e auditoria</span>
+        </li>
+        <li class="admin-nav-link" data-tab="tab-qrcodes" onclick="switchTab('tab-qrcodes')">
+          <span>QR Codes das mesas</span>
+        </li>
+      </ul>
+
+      <div style="padding: 16px; border-top: 1px solid var(--border-neutral); margin-top: auto;">
+        <a href="/" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; margin-bottom: 8px;">Ver site oficial</a>
+        <a href="/karaoke/telao" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%;">Abrir telão do karaokê</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+
+      <!-- Topbar -->
+      <header class="admin-topbar no-print">
+        <div>
+          <h2 class="page-header-title" id="pageTitleDisplay" style="font-size: 1.35rem; margin-bottom: 0;">Dashboard geral</h2>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <!-- Cashier Status Indicator -->
+          <div id="topbarCashierStatus" class="badge badge-green" style="cursor: pointer; padding: 5px 12px;" onclick="switchTab('tab-pdv')">
+            Caixa aberto
+          </div>
+
+          <!-- Quick Refresh Button -->
+          <button class="btn btn-secondary btn-sm" onclick="refreshCurrentTab()" title="Atualizar dados">
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <div class="admin-content-area">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ========================================== -->
+        <div class="tab-content active" id="tab-dashboard">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Total vendido (Hoje)</div>
+              <div class="kpi-value" id="kpiTotalSold">R$ 0,00</div>
+              <div class="kpi-subtext" id="kpiOrdersCount">0 pedidos registrados</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Total recebido no caixa</div>
+              <div class="kpi-value" style="color: var(--status-success);" id="kpiTotalReceived">R$ 0,00</div>
+              <div class="kpi-subtext">Pagamentos liquidados</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Consumo em aberto</div>
+              <div class="kpi-value" style="color: var(--accent-yellow);" id="kpiOpenBalance">R$ 0,00</div>
+              <div class="kpi-subtext">Mesas em atendimento</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Ticket médio</div>
+              <div class="kpi-value" id="kpiAvgTicket">R$ 0,00</div>
+              <div class="kpi-subtext">Por pedido finalizado</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <div class="card">
+              <h3 class="section-header-title" style="border-bottom: 1px solid var(--border-neutral); padding-bottom: 10px;">
+                Mais vendidos da semana
+              </h3>
+              <div id="dashTopProductsList" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Loaded via API -->
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="section-header-title" style="border-bottom: 1px solid var(--border-neutral); padding-bottom: 10px;">
+                Alertas operacionais
+              </h3>
+              <div id="dashAlertsList" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Stock alerts, pending orders, etc. -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: SALÃO & MESAS -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-mesas">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span class="badge badge-green">Livre</span>
+              <span class="badge badge-gold">Ocupada</span>
+              <span class="badge badge-blue">Aguardando fechamento</span>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openFastOrderModal()">+ Lançar consumo direto</button>
+          </div>
+
+          <div class="floor-grid" id="tablesFloorGrid">
+            <!-- Tables 1 to 16 rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: PEDIDOS PENDENTES (QR CODE) -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-pendentes">
+          <div style="margin-bottom: 20px;">
+            <p style="color: var(--text-secondary); font-size: 0.92rem;">
+              Solicitações enviadas pelos clientes via QR Code das mesas. A equipe confere e aprova para liberar o preparo na cozinha ou no bar.
+            </p>
+          </div>
+
+          <div id="pendingOrdersContainer" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Pending orders injected -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: PDV & CAIXA (LAYOUT 2/3 + 1/3) -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-pdv">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+
+            <!-- Left 2/3: Sessão de Caixa e Catálogo de Lançamento -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Cash drawer header card -->
+              <div class="card" id="cashierSessionCard">
+                <!-- Injected cashier session info -->
+              </div>
+
+              <!-- Product selector for fast ordering -->
+              <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <h3 class="section-header-title" style="margin-bottom: 0;">Lançamento no balcão e mesas</h3>
+                  <input type="text" id="pdvSearchInput" class="form-control" placeholder="Buscar produto..." style="max-width: 240px; padding: 7px 12px;">
+                </div>
+
+                <div id="pdvProductsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; max-height: 480px; overflow-y: auto;">
+                  <!-- Fast click items -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right 1/3: Comanda da Venda & Recebimento -->
+            <div>
+              <div class="card" style="position: sticky; top: 76px;">
+                <h3 class="section-header-title" style="border-bottom: 1px solid var(--border-neutral); padding-bottom: 10px; margin-bottom: 12px;">
+                  Comanda da venda
+                </h3>
+
+                <div class="form-group">
+                  <label class="form-label" for="pdvDestSelect">Destino do consumo</label>
+                  <select id="pdvDestSelect" class="form-control">
+                    <option value="balcao">Venda balcão (avulso)</option>
+                    <!-- Mesas injected -->
+                  </select>
+                </div>
+
+                <div id="pdvCartItems" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; margin-bottom: 16px; border-bottom: 1px dashed var(--border-neutral); padding-bottom: 12px;">
+                  <div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 20px 0;">
+                    Nenhum item adicionado à comanda.
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px;">
+                  <span>Subtotal:</span>
+                  <span id="pdvTotalDisplay">R$ 0,00</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <button class="btn btn-primary" style="width: 100%;" onclick="openPaymentModal()">
+                    Receber pagamento
+                  </button>
+                  <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="sendOrderToKitchenDirect()">
+                    Enviar para preparo
+                  </button>
+                  <button class="btn btn-outline btn-sm" style="width: 100%; color: var(--status-danger); border-color: var(--border-neutral);" onclick="clearPdvCart()">
+                    Limpar comanda
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: KDS COZINHA -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-cozinha">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">KDS — Cozinha e petiscaria</h3>
+              <p class="auxiliary-text">Preparo de porções na chapa, burgers e petiscos.</p>
+            </div>
+            <span class="badge badge-amber" id="kdsCozinhaCount">0 pedidos em fila</span>
+          </div>
+
+          <div class="kds-grid" id="kdsCozinhaContainer">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: KDS BAR -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-bar">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">KDS — Bar e coquetelaria</h3>
+              <p class="auxiliary-text">Tiragem de chopp, coquetéis artesanais, drinks e bebidas.</p>
+            </div>
+            <span class="badge badge-amber" id="kdsBarCount">0 pedidos em fila</span>
+          </div>
+
+          <div class="kds-grid" id="kdsBarContainer">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 7: PRONTOS PARA ENTREGA -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-prontos">
+          <div style="margin-bottom: 20px;">
+            <h3 class="page-header-title" style="font-size: 1.3rem;">Prontos para servir</h3>
+            <p class="auxiliary-text">Pedidos finalizados pelo bar e cozinha que aguardam entrega nas mesas pelo garçom.</p>
+          </div>
+
+          <div id="readyOrdersContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 8: MODERAÇÃO DO KARAOKÊ -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-karaoke">
+          <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--accent-yellow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <span class="badge badge-gold" style="margin-bottom: 4px;">Sessão ao vivo</span>
+                <h3 style="font-size: 1.3rem; color: var(--text-primary); font-weight: 700;" id="karaokeSessionName">Noite Vikings Solta a Voz</h3>
+                <p class="auxiliary-text">Controle dos participantes que sobem ao palco no telão.</p>
+              </div>
+
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="callNextKaraokeSinger()">
+                  Chamar próximo ao palco
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnToggleKaraokePause" onclick="toggleKaraokePause()">
+                  Pausar inscrições
+                </button>
+                <a href="/karaoke/telao" target="_blank" class="btn btn-outline btn-sm">
+                  Abrir telão
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Moderação Queue Table -->
+          <div class="card">
+            <h3 class="section-header-title">Fila de inscrições e moderação</h3>
+            <div style="overflow-x: auto;">
+              <table class="vikings-table" id="karaokeAdminTable">
+                <thead>
+                  <tr>
+                    <th>Ordem</th>
+                    <th>Participante</th>
+                    <th>Mesa</th>
+                    <th>Música / Artista</th>
+                    <th>Status</th>
+                    <th>Tipo</th>
+                    <th>Ações da moderação</th>
+                  </tr>
+                </thead>
+                <tbody id="karaokeAdminTbody">
+                  <!-- Injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 9: GESTÃO DO CARDÁPIO -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-cardapio">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">Cardápio administrável</h3>
+              <p class="auxiliary-text">Cadastre produtos, ajuste preços, controle esgotados e visibilidade.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewProductModal()">+ Novo produto</button>
+          </div>
+
+          <div class="card">
+            <div style="overflow-x: auto;">
+              <table class="vikings-table">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Preço base</th>
+                    <th>Destino</th>
+                    <th>Estoque</th>
+                    <th>Esgotado?</th>
+                    <th>Visibilidade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="adminProductsTbody">
+                  <!-- Injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 10: AGENDA DE EVENTOS -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-agenda">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">Programação da semana</h3>
+              <p class="auxiliary-text">Shows ao vivo, karaokê, transmissões de futebol e promoções.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewEventModal()">+ Novo evento</button>
+          </div>
+
+          <div id="adminEventsList" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 11: CONTROLE DE ESTOQUE -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-estoque">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">Controle de estoque</h3>
+              <p class="auxiliary-text">Acompanhe saldos, limites mínimos e registre entradas ou perdas com justificativa.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openStockMovementModal()">+ Registrar movimentação</button>
+          </div>
+
+          <div class="card" style="margin-bottom: 20px;">
+            <div style="overflow-x: auto;">
+              <table class="vikings-table">
+                <thead>
+                  <tr>
+                    <th>Item / Produto</th>
+                    <th>Categoria</th>
+                    <th>Estoque atual</th>
+                    <th>Estoque mínimo</th>
+                    <th>Status</th>
+                    <th>Ação rápida</th>
+                  </tr>
+                </thead>
+                <tbody id="adminStockTbody">
+                  <!-- Injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="card">
+            <h4 class="section-header-title" style="font-size: 1rem;">Histórico recente de movimentações</h4>
+            <div style="overflow-x: auto;">
+              <table class="vikings-table" style="font-size: 0.84rem;">
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Qtd</th>
+                    <th>Anterior → Novo</th>
+                    <th>Justificativa</th>
+                    <th>Responsável</th>
+                  </tr>
+                </thead>
+                <tbody id="adminStockHistoryTbody">
+                  <!-- Injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 12: RELATÓRIOS & AUDITORIA -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-relatorios">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">Relatórios gerenciais e auditoria</h3>
+              <p class="auxiliary-text">Consistência financeira, cancelamentos e registro de ações críticas.</p>
+            </div>
+            <a href="/api/reports/export-csv" class="btn btn-primary btn-sm" download>
+              Exportar vendas (CSV)
+            </a>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+            <!-- Payment Methods Breakdown -->
+            <div class="card">
+              <h4 class="section-header-title" style="font-size: 1rem;">Formas de pagamento recebidas</h4>
+              <div id="reportsPaymentMethodsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Injected -->
+              </div>
+            </div>
+
+            <!-- Cancellations Log -->
+            <div class="card">
+              <h4 class="section-header-title" style="font-size: 1rem;">Cancelamentos registrados</h4>
+              <div id="reportsCancellationsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto;">
+                <!-- Injected -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Logs -->
+          <div class="card">
+            <h4 class="section-header-title" style="font-size: 1rem;">Trilha de auditoria (Últimas ações)</h4>
+            <div style="overflow-x: auto;">
+              <table class="vikings-table" style="font-size: 0.82rem;">
+                <thead>
+                  <tr>
+                    <th>Horário</th>
+                    <th>Usuário</th>
+                    <th>Ação</th>
+                    <th>Alvo</th>
+                    <th>Detalhes</th>
+                  </tr>
+                </thead>
+                <tbody id="adminAuditLogsTbody">
+                  <!-- Injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 13: QR CODES DE TODAS AS MESAS -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-qrcodes">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h3 class="page-header-title" style="font-size: 1.3rem;">Cartões de QR Code para impressão</h3>
+              <p class="auxiliary-text">Imprima estes cartões para fixar nas mesas do salão ou no balcão.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.print()">Imprimir cartões</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px;" id="qrCardsGrid">
+            <!-- 16 table QR codes generated -->
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAIS DO SISTEMA -->
+  <!-- ========================================== -->
+
+  <!-- Table Details Modal -->
+  <div class="modal-backdrop" id="tableDetailsModal">
+    <div class="modal-window" style="max-width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-neutral); padding-bottom: 10px;">
+        <h3 id="tableModalTitle" style="font-size: 1.25rem; font-weight: 700;"></h3>
+        <button onclick="closeModal('tableDetailsModal')" style="background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div id="tableModalBody">
+        <!-- Injected table details, orders, items, payments, and buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Table Modal -->
+  <div class="modal-backdrop" id="openTableModal">
+    <div class="modal-window" style="max-width: 460px;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 16px;" id="openTableModalTitle">Abrir mesa</h3>
+      <input type="hidden" id="openTableId">
+
+      <div class="form-group">
+        <label class="form-label" for="openTableClient">Nome do cliente ou comanda</label>
+        <input type="text" id="openTableClient" class="form-control" placeholder="Ex: Rodrigo e amigos">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="openTablePeople">Número de pessoas</label>
+        <input type="number" id="openTablePeople" class="form-control" value="2" min="1" max="30">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="openTableNotes">Observações</label>
+        <input type="text" id="openTableNotes" class="form-control" placeholder="Ex: Aniversariante na mesa">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="submitOpenTable()">Confirmar abertura</button>
+        <button class="btn btn-secondary" onclick="closeModal('openTableModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Modal -->
+  <div class="modal-backdrop" id="transferModal">
+    <div class="modal-window" style="max-width: 460px;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 16px;" id="transferModalTitle">Transferir consumo</h3>
+      <input type="hidden" id="transferFromTableId">
+      <input type="hidden" id="transferOrderItemId">
+
+      <div class="form-group">
+        <label class="form-label" for="transferTargetTableSelect">Mesa de destino</label>
+        <select id="transferTargetTableSelect" class="form-control"></select>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="submitTransfer()">Confirmar transferência</button>
+        <button class="btn btn-secondary" onclick="closeModal('transferModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-backdrop" id="paymentModal">
+    <div class="modal-window" style="max-width: 500px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem;">Receber pagamento</h3>
+        <button onclick="closeModal('paymentModal')" style="background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div style="background-color: var(--bg-elevated); border: 1px solid var(--border-neutral); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">
+          <span>Valor a pagar:</span>
+          <span id="paymentTotalDue">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- Bill Splitting -->
+      <div class="form-group" style="background: var(--bg-elevated); border: 1px dashed var(--border-neutral); padding: 12px; border-radius: var(--radius-md);">
+        <label class="form-label">Dividir conta (Opcional)</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="number" id="splitCountInput" class="form-control" placeholder="Pessoas (ex: 3)" min="1" max="50" oninput="calcSplit()">
+          <span style="font-weight: 600; color: var(--text-primary); white-space: nowrap;" id="splitResultDisplay">= R$ 0,00 / pessoa</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="paymentAmountInput">Valor deste pagamento (R$)</label>
+        <input type="number" id="paymentAmountInput" class="form-control" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="paymentMethodSelect">Forma de pagamento</label>
+        <select id="paymentMethodSelect" class="form-control" onchange="toggleCashInput()">
+          <option value="pix">Pix (Chave / QR Code no Balcão)</option>
+          <option value="cartao_debito">Cartão de débito</option>
+          <option value="cartao_credito">Cartão de crédito</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="cortesia">Cortesia / Parceria</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="cashGroup" style="display: none;">
+        <label class="form-label" for="cashReceivedInput">Valor em dinheiro entregue</label>
+        <input type="number" id="cashReceivedInput" class="form-control" step="0.01" placeholder="Ex: 50.00" oninput="calcChange()">
+        <div style="margin-top: 6px; font-weight: 600; color: var(--status-success);" id="changeDisplay">Troco: R$ 0,00</div>
+      </div>
+
+      <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 16px;">
+        * Pagamento manual registrado para controle operacional interno. Não substitui emissor fiscal.
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="submitPayment()">Confirmar recebimento</button>
+        <button class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Non-Fiscal Receipt Modal -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-window" style="max-width: 420px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;" class="no-print">
+        <h3 style="font-size: 1.15rem;">Comprovante não fiscal</h3>
+        <button onclick="closeModal('receiptModal')" style="background: none; border: none; color: var(--text-secondary); font-size: 1.4rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="receipt-paper" id="receiptPaper">
+        <!-- Rendered receipt content -->
+      </div>
+
+      <div style="margin-top: 18px; display: flex; gap: 10px;" class="no-print">
+        <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">Imprimir pelo navegador</button>
+        <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cash Movement (Sangria / Suprimento) Modal -->
+  <div class="modal-backdrop" id="cashMovementModal">
+    <div class="modal-window" style="max-width: 460px;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 16px;" id="cashMovementTitle">Sangria / Suprimento</h3>
+      <input type="hidden" id="cashMovementType">
+
+      <div class="form-group">
+        <label class="form-label" for="cashMoveAmount">Valor (R$)</label>
+        <input type="number" id="cashMoveAmount" class="form-control" step="0.01" placeholder="Ex: 100.00">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="cashMoveReason">Justificativa obrigatória</label>
+        <input type="text" id="cashMoveReason" class="form-control" placeholder="Ex: Suprimento para troco ou retirada para cofre">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="submitCashMovement()">Salvar operação</button>
+        <button class="btn btn-secondary" onclick="closeModal('cashMovementModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Movement Modal -->
+  <div class="modal-backdrop" id="stockMovementModal">
+    <div class="modal-window" style="max-width: 460px;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 16px;">Movimentação de estoque</h3>
+
+      <div class="form-group">
+        <label class="form-label" for="stockMoveProduct">Produto</label>
+        <select id="stockMoveProduct" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="stockMoveType">Tipo de movimentação</label>
+        <select id="stockMoveType" class="form-control">
+          <option value="entrada">Entrada (Compra / Reposição)</option>
+          <option value="saida_manual">Saída manual (Consumo interno / Perda)</option>
+          <option value="ajuste">Ajuste de balanço (Contagem real)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="stockMoveQty">Quantidade</label>
+        <input type="number" id="stockMoveQty" class="form-control" step="0.5" placeholder="Ex: 24">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="stockMoveReason">Justificativa obrigatória</label>
+        <input type="text" id="stockMoveReason" class="form-control" placeholder="Ex: Entrada de fardos nota 812">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="submitStockMovement()">Registrar</button>
+        <button class="btn btn-secondary" onclick="closeModal('stockMovementModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Order Modal -->
+  <div class="modal-backdrop" id="cancelOrderModal">
+    <div class="modal-window" style="max-width: 440px;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--status-danger);">Cancelar pedido</h3>
+      <input type="hidden" id="cancelOrderId">
+
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+        O cancelamento estorna os itens controlados de volta ao estoque e registra na auditoria.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" for="cancelReasonInput">Motivo do cancelamento *</label>
+        <input type="text" id="cancelReasonInput" class="form-control" placeholder="Ex: Cliente desistiu do item" required>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-danger" style="flex: 1;" onclick="submitCancelOrder()">Confirmar cancelamento</button>
+        <button class="btn btn-secondary" onclick="closeModal('cancelOrderModal')">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/painel.js"></script>
+</body>
+</html>

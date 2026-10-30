@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boteco Vikings — O Boteco Raiz com Espírito Nórdico</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/logo-vikings.png">
+</head>
+<body>
+
+  <!-- Header Público com 3 Grupos (88px Desktop / 72px Mobile) -->
+  <header class="site-header">
+    <div class="nav-container">
+      
+      <!-- Grupo 1: Logo à esquerda -->
+      <a href="/" class="brand-link" title="Boteco Vikings — Início">
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" class="brand-logo-img">
+      </a>
+
+      <!-- Grupo 2: Navegação ao centro (sem emojis, limpa) -->
+      <nav class="nav-menu" id="navMenu">
+        <a href="#sobre">O Boteco</a>
+        <a href="#programacao">Programação</a>
+        <a href="/karaoke">Karaokê</a>
+        <a href="#reserva">Reservas</a>
+        <a href="#localizacao">Localização</a>
+      </nav>
+
+      <!-- Grupo 3: Ações à direita -->
+      <div class="nav-actions">
+        <a href="/cardapio" class="btn btn-primary btn-sm">Ver cardápio</a>
+        <a href="/painel" class="team-area-link" title="Área Restrita da Equipe">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+          <span>Área da equipe</span>
+        </a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu de navegação">☰</button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="mobile-drawer" id="mobileDrawer" aria-label="Menu móvel">
+    <div class="mobile-drawer-header">
+      <img src="/assets/logo-vikings.png" alt="Boteco Vikings" style="width: 110px;">
+      <button class="mobile-drawer-close" id="drawerClose" aria-label="Fechar menu">✕</button>
+    </div>
+    <div class="mobile-drawer-links">
+      <a href="#sobre" class="drawer-nav-link">O Boteco</a>
+      <a href="#programacao" class="drawer-nav-link">Programação</a>
+      <a href="/karaoke" class="drawer-nav-link">Karaokê</a>
+      <a href="#reserva" class="drawer-nav-link">Reservas</a>
+      <a href="#localizacao" class="drawer-nav-link">Localização</a>
+      <hr style="border: 0; border-top: 1px solid var(--border-neutral); margin: 8px 0;">
+      <a href="/cardapio" class="btn btn-primary" style="text-align: center; justify-content: center;">Ver cardápio</a>
+      <a href="/painel" class="team-area-link" style="padding: 10px 0; justify-content: flex-start;">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <span>Área da equipe</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Hero Section Oficial -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-tagline-badge">
+        <span>O Boteco Raiz com Espírito Nórdico</span>
+      </div>
+
+      <!-- Logo Oficial com Escala Equilibrada -->
+      <div>
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" class="hero-logo">
+      </div>
+
+      <div class="viking-ornament-divider">
+        <div class="viking-ornament-line"></div>
+        <div class="viking-ornament-symbol">ᛟ • ᛏ</div>
+        <div class="viking-ornament-line"></div>
+      </div>
+
+      <h1 class="hero-title">
+        Madeira, chopp trincando e boas histórias
+      </h1>
+
+      <p class="hero-desc">
+        Aqueça sua noite com os melhores petiscos na chapa, chopp gelado, drinks autorais e o telão interativo do karaokê. Reúna seus amigos e venha brindar conosco.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="/cardapio" class="btn btn-primary btn-lg">Ver cardápio completo</a>
+        <a href="/karaoke" class="btn btn-secondary btn-lg">Subir ao palco no karaokê</a>
+        <a href="#programacao" class="btn btn-outline btn-lg">Programação da semana</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- O Boteco & Atmosfera -->
+  <section id="sobre" style="padding: 70px 24px 40px; max-width: 1240px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: center;">
+      <div>
+        <span class="section-tag">A nossa casa</span>
+        <h2 style="font-size: 2.2rem; margin-bottom: 18px; color: var(--text-primary); font-weight: 700;">
+          Iluminação quente, amigos reunidos e resenha boa
+        </h2>
+        <p style="margin-bottom: 16px; font-size: 1.02rem; line-height: 1.65;">
+          O <strong>Boteco Vikings</strong> nasceu da união entre a alma acolhedora dos botecos tradicionais brasileiros e a força das confrarias nórdicas. Aqui, cada brinde celebra uma amizade e cada mesa é um verdadeiro banquete.
+        </p>
+        <p style="margin-bottom: 24px; font-size: 1.02rem; line-height: 1.65;">
+          Nossas carnes e petiscos são preparados na chapa fumegante com receitas artesanais, e o chopp desce na temperatura ideal para hidratar qualquer guerreiro após um longo dia de trabalho.
+        </p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div class="card" style="padding: 14px 22px; flex: 1; min-width: 120px; text-align: center;">
+            <div style="font-size: 1.8rem; color: var(--text-primary); font-weight: 800;">16</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary);">Mesas no salão</div>
+          </div>
+          <div class="card" style="padding: 14px 22px; flex: 1; min-width: 120px; text-align: center;">
+            <div style="font-size: 1.8rem; color: var(--text-primary); font-weight: 800;">-2°C</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary);">Caneca ultracongelada</div>
+          </div>
+          <div class="card" style="padding: 14px 22px; flex: 1; min-width: 120px; text-align: center;">
+            <div style="font-size: 1.8rem; color: var(--text-primary); font-weight: 800;">100%</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary);">Espírito acolhedor</div>
+          </div>
+        </div>
+      </div>
+      <div style="position: relative;">
+        <img src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80" alt="Atmosfera Vikings" style="width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--border-neutral);">
+        <div style="position: absolute; background-color: rgba(18, 18, 18, 0.95); border: 1px solid var(--border-neutral); padding: 12px 20px; border-radius: var(--radius-md); bottom: -16px; right: 20px; box-shadow: var(--shadow-md);">
+          <span style="color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Chopp & Gastronomia Raiz</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programação da Semana -->
+  <section id="programacao" class="schedule-section">
+    <div class="section-header">
+      <span class="section-tag">Programação da semana</span>
+      <h2 class="section-title">O que rola no Boteco Vikings</h2>
+      <p class="section-subtitle">Shows ao vivo, karaokê interativo e grandes transmissões esportivas. Acompanhe a nossa agenda oficial atualizada em tempo real.</p>
+    </div>
+
+    <!-- Live Event Banners Container -->
+    <div class="schedule-list" id="eventsContainer">
+      <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+        Carregando programação da semana...
+      </div>
+    </div>
+  </section>
+
+  <!-- Destaques do Cardápio -->
+  <section id="cardapio-destaque" style="background-color: var(--bg-sidebar); padding: 70px 24px; border-top: 1px solid var(--border-neutral); border-bottom: 1px solid var(--border-neutral);">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-header">
+        <span class="section-tag">Cozinha e bar</span>
+        <h2 class="section-title">Os favoritos da casa</h2>
+        <p class="section-subtitle">Porções fartas na chapa fumegante, petiscos crocantes e drinks autorais preparados pelos nossos barmans.</p>
+      </div>
+
+      <div class="highlights-grid" id="featuredProductsContainer">
+        <!-- Loaded dynamically from API -->
+      </div>
+
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="/cardapio" class="btn btn-primary btn-lg">Abrir cardápio completo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção Karaokê "Solta a Voz, Vikings!" -->
+  <section style="padding: 70px 24px; max-width: 1200px; margin: 0 auto;">
+    <div class="card" style="padding: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; align-items: center; border-left: 4px solid var(--accent-yellow);">
+      <div>
+        <span class="badge badge-gold" style="margin-bottom: 12px;">Experiência interativa</span>
+        <h2 style="font-size: 2rem; margin-bottom: 14px; font-weight: 700; color: var(--text-primary);">Solta a Voz, Vikings!</h2>
+        <p style="margin-bottom: 16px; line-height: 1.6; color: var(--text-secondary);">
+          Sem papéis ou filas manuais. No Vikings você escolhe sua música direto pelo celular, acompanha sua posição e canta acompanhado pelo telão oficial do bar.
+        </p>
+        <ul style="list-style: none; margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+          <li style="display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 0.95rem;">
+            <span style="color: var(--accent-yellow); font-weight: 700;">•</span> Cante solo ou monte uma dupla para dueto
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 0.95rem;">
+            <span style="color: var(--accent-yellow); font-weight: 700;">•</span> Rodízio justo para que todos tenham a sua vez
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 0.95rem;">
+            <span style="color: var(--accent-yellow); font-weight: 700;">•</span> Telão em tempo real avisando os próximos participantes
+          </li>
+        </ul>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="/karaoke" class="btn btn-primary">Inscrever minha música</a>
+          <a href="/karaoke/telao" target="_blank" class="btn btn-secondary">Abrir visão do telão</a>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <div class="card" style="border: 1px dashed var(--border-neutral); padding: 24px; display: inline-block; background-color: var(--bg-elevated);">
+          <img id="karaokeQrImg" src="" alt="QR Code Karaokê" style="width: 170px; height: 170px; border-radius: var(--radius-md); display: block; margin: 0 auto 12px;">
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.92rem;">Aponte a câmera do celular</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">e entre na fila do karaokê agora mesmo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reserva pelo WhatsApp -->
+  <section id="reserva" style="padding: 0 24px;">
+    <div class="reservation-banner">
+      <span class="section-tag" style="color: var(--text-primary);">Comemorações e aniversários</span>
+      <h2 style="font-size: 2rem; margin-bottom: 12px; font-weight: 700; color: var(--text-primary);">Consulte sua reserva de mesa</h2>
+      <p style="font-size: 1rem; max-width: 620px; margin: 0 auto 20px; color: var(--text-secondary);">
+        Vai comemorar aniversário, reunir a turma da empresa ou garantir lugar para uma transmissão? Fale diretamente com nossa equipe pelo WhatsApp.
+      </p>
+      <a href="https://wa.me/5511987654321?text=Ol%C3%A1%2C%20gostaria%20de%20consultar%20a%20disponibilidade%20de%20reserva%20de%20mesa%20no%20Boteco%20Vikings!" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">
+        Consultar reserva no WhatsApp
+      </a>
+      <div class="reservation-disclaimer">
+        * A mensagem enviada é uma consulta de disponibilidade. Nenhuma reserva é confirmada automaticamente sem o retorno da nossa equipe.
+      </div>
+    </div>
+  </section>
+
+  <!-- Localização & Horários -->
+  <section id="localizacao" style="padding: 60px 24px; max-width: 1200px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; margin-bottom: 10px; font-weight: 600;">Onde estamos</h3>
+        <p style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 4px;">Rua dos Guerreiros, 980</p>
+        <p style="font-size: 0.88rem; color: var(--text-secondary);">Bairro Boêmio — São Paulo, SP</p>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 10px;">Estacionamento conveniado e ponto de táxi próximo.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.15rem; margin-bottom: 10px; font-weight: 600;">Horário de atendimento</h3>
+        <p style="color: var(--text-primary); font-size: 0.92rem; margin-bottom: 4px;"><strong>Terça a Sexta:</strong> 17h até o fechamento</p>
+        <p style="color: var(--text-primary); font-size: 0.92rem; margin-bottom: 4px;"><strong>Sábados & Feriados:</strong> 15h até o fechamento</p>
+        <p style="color: var(--text-primary); font-size: 0.92rem;"><strong>Domingos:</strong> 14h às 23h</p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.15rem; margin-bottom: 10px; font-weight: 600;">Contato & redes</h3>
+        <p style="color: var(--text-primary); font-size: 0.92rem; margin-bottom: 4px;"><strong>WhatsApp:</strong> (11) 98765-4321</p>
+        <p style="color: var(--text-primary); font-size: 0.92rem; margin-bottom: 12px;"><strong>Instagram:</strong> @botecovikings</p>
+        <a href="https://instagram.com" target="_blank" class="btn btn-outline btn-sm">Seguir no Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rodapé Oficial -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <img src="/assets/logo-vikings.png" alt="Boteco Vikings" class="footer-brand-logo">
+        <p style="font-size: 0.9rem; line-height: 1.6; max-width: 360px; color: var(--text-secondary);">
+          O boteco com comida de verdade, chopp gelado, música ao vivo e atmosfera acolhedora. Venha brindar conosco.
+        </p>
+      </div>
+      <div>
+        <h4 class="footer-title">Navegação</h4>
+        <ul class="footer-links">
+          <li><a href="/cardapio">Cardápio digital</a></li>
+          <li><a href="/karaoke">Karaokê</a></li>
+          <li><a href="#programacao">Programação da semana</a></li>
+          <li><a href="#reserva">Consulta de reservas</a></li>
+          <li><a href="/painel">Área da equipe</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-title">Plataforma</h4>
+        <ul class="footer-links">
+          <li><a href="/painel">Painel de mesas & PDV</a></li>
+          <li><a href="/painel">KDS cozinha & bar</a></li>
+          <li><a href="/karaoke/telao">Modo telão do karaokê</a></li>
+          <li><span style="color: var(--text-secondary); font-size: 0.8rem;">Versão 2.4 — 100% Funcional</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Boteco Vikings. Todos os direitos reservados.</div>
+      <div>Feito para confraternizações e boa gastronomia.</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile navigation drawer toggle with focus trap & Esc handler
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const drawerClose = document.getElementById('drawerClose');
+
+    function openDrawer() {
+      mobileDrawer.classList.add('active');
+      drawerBackdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      mobileDrawer.classList.remove('active');
+      drawerBackdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openDrawer);
+    drawerClose.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+
+    document.querySelectorAll('.drawer-nav-link').forEach(link => {
+      link.addEventListener('click', closeDrawer);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileDrawer.classList.contains('active')) {
+        closeDrawer();
+      }
+    });
+
+    // Load Weekly Events from API
+    async function loadEvents() {
+      try {
+        const res = await fetch('/api/events?public=true');
+        const data = await res.json();
+        const container = document.getElementById('eventsContainer');
+        if (data.events && data.events.length > 0) {
+          container.innerHTML = data.events.map(ev => `
+            <div class="schedule-banner-item">
+              <div class="schedule-date-col">
+                <span class="schedule-weekday">${ev.weekday_label}</span>
+                <span class="schedule-date-day">${ev.date_formatted}</span>
+              </div>
+              <div class="schedule-info-col">
+                <div class="schedule-badge-wrapper" style="margin-bottom: 4px;">
+                  <span class="badge ${ev.category === 'karaoke' ? 'badge-amber' : ev.category === 'jogo' ? 'badge-green' : 'badge-gold'}">
+                    ${ev.badge_text || ev.category.toUpperCase()}
+                  </span>
+                </div>
+                <h3 class="schedule-attraction-title">${ev.title}</h3>
+                <p class="schedule-desc">${ev.description || ''}</p>
+              </div>
+              <div class="schedule-action-col">
+                <span class="schedule-time-tag">${ev.time_label}</span>
+                <a href="https://wa.me/5511987654321?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20mesa%20para%20o%20evento%3A%20${encodeURIComponent(ev.title)}%20(${ev.date_formatted})" target="_blank" class="btn btn-outline btn-sm">
+                  Consultar mesa
+                </a>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div style="text-align: center; color: var(--text-secondary);">Nenhum evento agendado para esta semana. Fique atento às nossas redes!</div>';
+        }
+      } catch (err) {
+        console.error('Erro ao carregar eventos:', err);
+      }
+    }
+
+    // Load Featured Products
+    async function loadFeaturedProducts() {
+      try {
+        const res = await fetch('/api/menu/products');
+        const data = await res.json();
+        const container = document.getElementById('featuredProductsContainer');
+        const featured = (data.products || []).filter(p => p.is_featured).slice(0, 3);
+
+        if (featured.length > 0) {
+          container.innerHTML = featured.map(prod => `
+            <div class="highlight-card">
+              <div class="highlight-image-box">
+                <img src="${prod.image_url || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}" alt="${prod.name}" class="highlight-image">
+                <div style="position: absolute; top: 12px; right: 12px;">
+                  <span class="badge badge-gold">${prod.category_name}</span>
+                </div>
+              </div>
+              <div class="highlight-content">
+                <div>
+                  <h3 class="highlight-title">${prod.name}</h3>
+                  <p style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 14px; color: var(--text-secondary);">${prod.description}</p>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-neutral); padding-top: 12px;">
+                  <span class="highlight-price">R$ ${prod.price.toFixed(2)}</span>
+                  <a href="/cardapio" class="btn btn-primary btn-sm">Pedir no cardápio</a>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Erro ao carregar produtos em destaque:', err);
+      }
+    }
+
+    // Load Karaoke QR Code
+    async function loadKaraokeQR() {
+      try {
+        const url = `${window.location.origin}/karaoke`;
+        const res = await fetch(`/api/qrcode?text=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.dataUrl) {
+          document.getElementById('karaokeQrImg').src = data.dataUrl;
+        }
+      } catch (err) {
+        console.error('Erro ao gerar QR Code do karaokê:', err);
+      }
+    }
+
+    loadEvents();
+    loadFeaturedProducts();
+    loadKaraokeQR();
+  </script>
+</body>
+</html>
