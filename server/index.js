@@ -42,15 +42,15 @@ app.use((req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`=========================================`);
   console.log(`⚔️  BOTECO VIKINGS PLATAFORMA INTEGRADA  ⚔️`);
-  console.log(`Servidor rodando em: http://localhost:${PORT}`);
-  console.log(`- Landing Page:     http://localhost:${PORT}`);
-  console.log(`- Cardápio Digital: http://localhost:${PORT}/cardapio`);
-  console.log(`- Karaokê Cliente:  http://localhost:${PORT}/karaoke`);
-  console.log(`- Karaokê Telão:    http://localhost:${PORT}/karaoke/telao`);
-  console.log(`- Painel de Gestão: http://localhost:${PORT}/painel`);
+  console.log(`Servidor rodando localmente e na rede:`);
+  console.log(`- Local:            http://localhost:${PORT}`);
+  console.log(`- Rede Local (Wi-Fi): http://192.168.100.76:${PORT}`);
+  console.log(`- Cardápio na Rede: http://192.168.100.76:${PORT}/cardapio`);
+  console.log(`- Painel & PDV:     http://192.168.100.76:${PORT}/painel`);
+  console.log(`- Karaokê Telão:    http://192.168.100.76:${PORT}/karaoke/telao`);
   console.log(`=========================================`);
 });
 
